@@ -66,6 +66,15 @@ task.spawn(function()
 	end
 end)
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ChangeDrop = ReplicatedStorage.Remotes.ChangeDrop -- RemoteEvent 
+while wait(1) do
+    ChangeDrop:FireServer(
+        "Double"
+    )
+end
+
+
 -- Hotkey (RightShift) to toggle UI
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
