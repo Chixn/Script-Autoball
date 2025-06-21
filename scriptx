@@ -1,29 +1,22 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local DropBallAtPosition = ReplicatedStorage.Remotes:WaitForChild("DropBallAtPosition")
+local DropBall = ReplicatedStorage.Remotes:WaitForChild("DropBall")
 local LocalPlayer = Players.LocalPlayer
 local VirtualUser = game:service("VirtualUser")
-local UserInputService = game:GetService("UserInputService")
 
 -- Anti AFK
-LocalPlayer.Idled:Connect(function()
+LocalPlayer.Idled:connect(function()
 	VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 	wait(1)
 	VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
 end)
 
--- Main variables
-local isDropping = true
-local running = true -- สำหรับ stop loop
-local latestBallName = "Ball_3745601762_1750500122.2371638" -- เปลี่ยนตามที่มึงได้
-local purplePosition = Vector3.new(-222, 44, 117) -- ใส่พิกัด X0.1-UGC ที่ถูกต้อง
-
--- GUI
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "LockDropUI"
+-- UI Setup
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+ScreenGui.Name = "AutoDropUI"
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 200, 0, 160)
+Frame.Size = UDim2.new(0, 200, 0, 120)
 Frame.Position = UDim2.new(0, 20, 0, 100)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Frame.Visible = true
@@ -33,10 +26,10 @@ Frame.Draggable = true
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.BackgroundTransparency = 1
-Title.Text = "🎯 Auto Drop X0.1 (UGC)"
+Title.Text = " 🏐Auto Drop Ball"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 18
+Title.TextSize = 20
 
 local Toggle = Instance.new("TextButton", Frame)
 Toggle.Size = UDim2.new(1, -20, 0, 40)
@@ -47,15 +40,9 @@ Toggle.Font = Enum.Font.SourceSans
 Toggle.TextSize = 18
 Toggle.Text = "✅ Auto Drop: ON"
 
-local Exit = Instance.new("TextButton", Frame)
-Exit.Size = UDim2.new(1, -20, 0, 30)
-Exit.Position = UDim2.new(0, 10, 0, 90)
-Exit.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-Exit.TextColor3 = Color3.new(1, 1, 1)
-Exit.Font = Enum.Font.SourceSans
-Exit.TextSize = 16
-Exit.Text = "❌ กาบาด (ปิดตัวสคริปต์)"
+local isDropping = true
 
+-- Toggle Button
 Toggle.MouseButton1Click:Connect(function()
 	isDropping = not isDropping
 	if isDropping then
@@ -67,25 +54,20 @@ Toggle.MouseButton1Click:Connect(function()
 	end
 end)
 
-Exit.MouseButton1Click:Connect(function()
-	running = false
-	ScreenGui:Destroy()
-end)
-
--- Auto Drop loop
+-- Auto Drop Loop
 task.spawn(function()
-	while running do
+	while true do
 		if isDropping then
 			pcall(function()
-				DropBallAtPosition:FireServer(latestBallName, purplePosition)
+				DropBall:FireServer()
 			end)
 		end
 		wait(0.1)
 	end
 end)
 
--- RightShift toggle
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
+-- Hotkey (RightShift) to toggle UI
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 	if input.KeyCode == Enum.KeyCode.RightShift then
 		Frame.Visible = not Frame.Visible
